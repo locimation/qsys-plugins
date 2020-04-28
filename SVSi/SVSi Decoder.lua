@@ -34,10 +34,10 @@
 ]]
 
 PluginInfo = {
-  Name = "SVSi Decoder v1.4",
+  Name = "SVSi Decoder v1.3.1",
   Version = "1.3.1",
   Id = "9d3fa871-0c9e-4bf3-85bc-f70656f4b5c4",
-  Description = "Added suthoritative property and subsequent functions",
+  Description = "Added authoritative property and subsequent functions",
   ShowDebug = false
 }
 
