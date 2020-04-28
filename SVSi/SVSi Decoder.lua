@@ -49,9 +49,9 @@ function GetProperties()
   local props = {}
 
   table.insert(props,{
-    Name = "authoritative",
+    Name = "Authoritative",
     Type = "boolean", 
-    Value = "true",
+    Value = true,
   })
 
   return props;
@@ -910,11 +910,23 @@ function simplyUdateControls()
   Controls['Audio Mute'].Boolean = DECODER_STATUS['MUTE'] ~='0'
   
   -- Left Gain
-  DECODER_STATUS['LINEOUTVOL_L'] = Controls['Left Gain'].String
+  Controls['Left Gain'].String = DECODER_STATUS['LINEOUTVOL_L']
   -- Right Gain
-  DECODER_STATUS['LINEOUTVOL_R'] = Controls['Right Gain'].String
+  Controls['Right Gain'].String = DECODER_STATUS['LINEOUTVOL_R'] 
   
 end
+
+
+-- Local Controls Event Handlers, easy stuff, were already done!
+Controls['Video Stream'].EventHandler = doDiff
+Controls['Audio Stream'].EventHandler = doDiff
+Controls['Local Playback'].EventHandler = doDiff
+Controls['Local Playlist'].EventHandler = doDiff
+Controls['Local Playlist'].EventHandler = doDiff
+Controls['Video Mute'].EventHandler = doDiff
+Controls['Audio Mute'].EventHandler = doDiff
+Controls['Left Gain'].EventHandler = doDiff
+Controls['Right Gain'].EventHandler = doDiff
 
 -- IR functionality
 Controls['IR Send'].EventHandler = function()
