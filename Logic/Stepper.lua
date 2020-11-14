@@ -34,7 +34,7 @@
 ]]
 
 PluginInfo = {
-  Name = "Stepper",
+  Name = "Locimation~Stepper",
   Version = "1.0",
   Id = "28fd22ad-8698-4c86-93b3-9e719267b726",
   Description = "Initial release",
