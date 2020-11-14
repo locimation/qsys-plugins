@@ -3,7 +3,7 @@
   Q-Sys Web Streaming Plugin
   Author: Michael Goodyear
   Email: michael@locimation.com
-  Version: 1.1.0
+  Version: 1.1.1
   
   Copyright 2020 Locimation Pty Ltd
 
@@ -35,7 +35,7 @@
 
 PluginInfo = {
   Name = 'Locimation~WebStream',
-  Version = '1.1.0',
+  Version = '1.1.1',
   Id = 'd8f36599-f487-410a-9715-436005aee503',
   Description = 'Added bitrate control'
 };
@@ -339,7 +339,7 @@ Server.EventHandler = function(sock)
   print('# New HTTP connection.');
   sock.Data = function()
     local request = sock:ReadLine(TcpSocket.EOL.Custom, '\r\n\r\n');
-    local url, protocol = request:match('^[^ ]+ ([^ \r\n]+) ([^ \r\n]+)');
+    local url, protocol = request:match('^[^ ]+ ([^ \r\n]+) (HTTP[0-9/.]+)');
     url = url:lower();
     print('# Listener requested ' .. url);
     if(Receiver.List[url]) then
