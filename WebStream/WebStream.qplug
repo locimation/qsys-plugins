@@ -1,0 +1,382 @@
+--[[
+
+  Q-Sys Web Streaming Plugin
+  Author: Michael Goodyear
+  Email: michael@locimation.com
+  Version: 1.0.2
+  
+  Copyright 2020 Locimation Pty Ltd
+
+  Permission is hereby granted, free of charge,
+  to any person obtaining a copy of this software
+  and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify,
+  merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom
+  the Software is furnished to do so, subject to the
+  following conditions:
+
+  The above copyright notice and this permission
+  notice shall be included in all copies or substantial
+  portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY
+  OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+  LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+  EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+  FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+  AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+  OTHER DEALINGS IN THE SOFTWARE.
+
+]]
+
+PluginInfo = {
+  Name = 'Locimation~WebStream',
+  Version = '1.0.2',
+  Id = 'd8f36599-f487-410a-9715-436005aee503',
+  Description = 'Initial release'
+};
+
+function GetColor()
+  return { 165, 69, 214 };
+end;
+
+function GetPrettyName(props)
+  if(props['Stream Count'].Value < 3) then
+    return 'Locimation WebStream';
+  else
+    return 'WebStream by Locimation v' .. PluginInfo.Version;
+  end;
+end;
+
+function GetProperties()
+  return {
+    {
+      Name = 'Stream Count',
+      Type = 'integer',
+      Min = 1,
+      Max = 4,
+      Value = 1
+    },
+    {
+      Name = 'Server Port',
+      Type = 'integer',
+      Min = 1024,
+      Max = 65535,
+      Value = 8180
+    }
+  };
+end;
+
+function GetComponents(props)
+  local components = {};
+  for i=1,props['Stream Count'].Value do
+    table.insert(components, {
+      Name = 'MST' .. i,
+      Type = 'media_stream_transmitter'
+    });
+  end;
+  return components;
+end;
+
+function GetPins(props)
+  local pins = {};
+  for i = 1,props['Stream Count'].Value do
+    for j = 1,2 do
+      table.insert(pins, {
+        Name = ('Stream %d Channel %d'):format(i,j),
+        Direction = 'input'
+      });
+    end;
+  end;
+  return pins;
+end;
+
+function GetWiring(props)
+  local wiring = {};
+  for i = 1,props['Stream Count'].Value do
+    for j = 1,2 do
+      table.insert(wiring, {
+        ('Stream %d Channel %d'):format(i,j),
+        ('MST%d Channel %d'):format(i,j)
+      });
+    end;
+  end;
+  return wiring;
+end;
+
+function GetControls(props)
+  local controls = {
+    {
+      Name = 'Status',
+      ControlType = 'Indicator',
+      IndicatorType = 'Status',
+      UserPin = true,
+      PinStyle = 'Output'
+    },
+  };
+  for i=1,props['Stream Count'].Value do
+    table.insert(controls, {
+      Name = ('Stream %d URL'):format(i),
+      ControlType = 'Indicator',
+      IndicatorType = 'Text',
+      UserPin = true,
+      PinStyle = 'Output'
+    });
+    for j=1,2 do
+      table.insert(controls, {
+        Name = ('Stream %d Channel %d Peak Level'):format(i, j),
+        ControlType = 'Indicator',
+        IndicatorType = 'Meter',
+        UserPin = true,
+        PinStyle = 'Output'
+      });
+    end;
+    table.insert(controls, {
+      Name = ('Stream %d Listener Count'):format(i),
+      ControlType = 'Indicator',
+      IndicatorType = 'Text',
+      UserPin = true,
+      PinStyle = 'Output'
+    });
+  end;
+  return controls;
+end;
+
+function GetControlLayout(props)
+
+  GridUnit = 8;
+  LogoOffset = 100;
+  ControlSpacing = 3;
+  ControlHeight = GridUnit * 4;
+  StreamCount = props['Stream Count'].Value;
+
+  local graphics = {
+    {
+      Type = 'GroupBox',
+      Position = { 0, 0 },
+      Size = { 42*GridUnit, 38*GridUnit + (5*GridUnit)*(StreamCount - 1) },
+      Fill = { 255, 255, 255 }
+    },
+    {
+      Type = 'Label',
+      Text = 'Web',
+      HTextAlign = 'Right',
+      Font = 'Open Sans',
+      FontSize = 40,
+      Position = { 40, 55 },
+      Size = { 96, 51 },
+      Color = { 111, 47, 143 }
+    },
+    {
+      Type = 'Label',
+      Text = 'Stream',
+      Position = { 136, 55 },
+      Size = { 158, 51 },
+      HTextAlign = 'Left',
+      Font = 'Open Sans',
+      FontStyle = 'Bold',
+      FontSize = 40,
+      Color = { 111, 47, 143 }
+    },
+    {
+      Type = 'Svg',
+      Image = 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyNC4zLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCINCgkgdmlld0JveD0iMCAwIDQ5NC41IDQ5NC41IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA0OTQuNSA0OTQuNTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGc+DQoJPGc+DQoJCTxnPg0KCQkJPHBhdGggc3R5bGU9ImZpbGw6IzZGMkY4RjsiIGQ9Ik0yODYuMiw0MTcuNmMtNC44LTQuOC03LjctMTEuNC03LjctMTguN2MtMC4xLTEwMC45LTgyLjEtMTgyLjktMTgzLTE4Mw0KCQkJCUM4MC45LDIxNS45LDY5LDIwNCw2OSwxODkuNGMwLTE0LjYsMTEuOS0yNi40LDI2LjQtMjYuNGMxMzAuMSwwLDIzNS45LDEwNS44LDIzNS45LDIzNS45YzAsMTQuNi0xMS45LDI2LjQtMjYuNCwyNi40DQoJCQkJQzI5Ny42LDQyNS4zLDI5MC45LDQyMi40LDI4Ni4yLDQxNy42eiIvPg0KCQk8L2c+DQoJCTxnPg0KCQkJPHBhdGggc3R5bGU9ImZpbGw6IzZGMkY4RjsiIGQ9Ik0xODUsNDE3LjZjLTQuOC00LjgtNy43LTExLjQtNy43LTE4LjdjMC0yMS44LTguNi00Mi40LTI0LTU3LjhzLTM2LTI0LTU3LjgtMjQNCgkJCQljLTE0LjYsMC0yNi40LTExLjktMjYuNC0yNi40YzAtMTQuNiwxMS45LTI2LjQsMjYuNC0yNi40YzM1LjksMCw2OS43LDE0LDk1LjIsMzkuNWMyNS41LDI1LjUsMzkuNSw1OS4zLDM5LjQsOTUuMg0KCQkJCWMwLDE0LjYtMTEuOSwyNi40LTI2LjQsMjYuNEMxOTYuNSw0MjUuMywxODkuOCw0MjIuNCwxODUsNDE3LjZ6Ii8+DQoJCTwvZz4NCgkJPGc+DQoJCQk8Y2lyY2xlIHN0eWxlPSJmaWxsOiM2RjJGOEY7IiBjeD0iOTUuNSIgY3k9IjM5OC45IiByPSIzNS4zIi8+DQoJCTwvZz4NCgkJPGc+DQoJCQk8cGF0aCBzdHlsZT0iZmlsbDojNkYyRjhGOyIgZD0iTTM4OSw0MTcuNmMtNC44LTQuOC03LjctMTEuNC03LjctMTguN2MtMC4xLTE1Ny42LTEyOC4yLTI4NS43LTI4NS43LTI4NS43DQoJCQkJYy0xNC42LDAtMjYuNC0xMS45LTI2LjQtMjYuNGMwLTE0LjYsMTEuOS0yNi40LDI2LjQtMjYuNGM5MC41LDAsMTc1LjUsMzUuMiwyMzkuNSw5OS4yczk5LjIsMTQ5LDk5LjIsMjM5LjUNCgkJCQljMCwxNC42LTExLjksMjYuNC0yNi40LDI2LjRDNDAwLjQsNDI1LjMsMzkzLjcsNDIyLjQsMzg5LDQxNy42eiIvPg0KCQk8L2c+DQoJPC9nPg0KPC9nPg0KPC9zdmc+DQo=',
+      Position = { 214, 13 },
+      Size = { 62, 62 }
+    },
+    {
+      Type = 'Image',
+      Image = 'iVBORw0KGgoAAAANSUhEUgAAA4QAAAAoCAYAAACmeDQzAAAACXBIWXMAAAsTAAALEwEAmpwYAAAG8WlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDIgNzkuMTY0MzUyLCAyMDIwLzAxLzMwLTE1OjUwOjM4ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjEuMSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDIwLTAzLTI1VDAzOjU5OjAxKzExOjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyMC0wNC0xOVQxNDowODozOSsxMDowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMC0wNC0xOVQxNDowODozOSsxMDowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDowMjRkYTUxZS00NDA0LTIzNDktOGI1Mi1lZTA5NmJkMTc4ZDQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDozNWYzZWI2YS1lMzYzLWJmNGEtOWJjOS01MTU1NjU1NTVmZGQiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDphYmI1NDFmOS1lOGFlLTBiNDgtYWY4MC0xYThiNGEyOTFhMjkiPiA8cGhvdG9zaG9wOlRleHRMYXllcnM+IDxyZGY6QmFnPiA8cmRmOmxpIHBob3Rvc2hvcDpMYXllck5hbWU9IlByb2R1Y2VkIGJ5ICAgICAgICAgICAgICAgICAgICAgICAgYW5kIGRpc3RyaWJ1dGVkIHVuZGVyIE1JVCBsaSIgcGhvdG9zaG9wOkxheWVyVGV4dD0iUHJvZHVjZWQgYnkgICAgICAgICAgICAgICAgICAgICAgICBhbmQgZGlzdHJpYnV0ZWQgdW5kZXIgTUlUIGxpY2Vuc2UuIi8+IDwvcmRmOkJhZz4gPC9waG90b3Nob3A6VGV4dExheWVycz4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDphYmI1NDFmOS1lOGFlLTBiNDgtYWY4MC0xYThiNGEyOTFhMjkiIHN0RXZ0OndoZW49IjIwMjAtMDMtMjVUMDM6NTk6MDErMTE6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMS4xIChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDI0ZGE1MWUtNDQwNC0yMzQ5LThiNTItZWUwOTZiZDE3OGQ0IiBzdEV2dDp3aGVuPSIyMDIwLTA0LTE5VDE0OjA4OjM5KzEwOjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjEuMSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPC9yZGY6U2VxPiA8L3htcE1NOkhpc3Rvcnk+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3Jk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',
+      Position = { GridUnit, 35*GridUnit + (5*GridUnit)*(StreamCount - 1) - 2 },
+      Size = { 320, 15 }
+    },
+    {
+      Type = 'GroupBox',
+      Text = 'Status',
+      HTextAlign = 'Left',
+      StrokeWidth = 1, CornerRadius = 8,
+      Position = { 2*GridUnit, LogoOffset + 2*GridUnit },
+      Size = { 38*GridUnit, 6*GridUnit }
+    },
+    {
+      Type = 'GroupBox',
+      Text = 'Stream',
+      HTextAlign = 'Left',
+      StrokeWidth = 1, CornerRadius = 8,
+      Position = { 2*GridUnit, LogoOffset + 10 * GridUnit },
+      Size = { 38*GridUnit, 10*GridUnit + (5*GridUnit)*(StreamCount - 1) }
+    },
+    {
+      Type = 'Label',
+      Text = 'URL',
+      HTextAlign = 'Left',
+      Size = { 8*GridUnit, 2*GridUnit },
+      Position = { 10*GridUnit, LogoOffset + 12*GridUnit }
+    },
+    {
+      Type = 'Label',
+      Text = 'Listeners',
+      HTextAlign = 'Left',
+      Size = { 8*GridUnit, 2*GridUnit },
+      Position = { 30*GridUnit + ControlSpacing, LogoOffset + 12*GridUnit }
+    }
+  };
+
+  local layout = {};
+  layout['Status'] = {
+    Position = { 10*GridUnit, LogoOffset + 3*GridUnit },
+    Size = { 28*GridUnit, 4*GridUnit }
+  };
+
+  for i=1,StreamCount do
+    local yPos = LogoOffset + 14*GridUnit + (5*GridUnit)*(i - 1);
+    table.insert(graphics, {
+      Type = 'Label',
+      Text = string.format('%d', i),
+      Position = { 2*GridUnit, yPos },
+      Size = { 5*GridUnit, 4*GridUnit }
+    });
+    layout[('Stream %d Channel 1 Peak Level'):format(i)] = {
+      Position = { 8*GridUnit - 2*ControlSpacing, yPos },
+      Size = { GridUnit, 4*GridUnit },
+      CornerRadius = 0, ShowTextbox = false,
+      PrettyName = ('Stream %d~Channel 1 Peak Level'):format(i)
+    };
+    layout[('Stream %d Channel 2 Peak Level'):format(i)] = {
+      Position = { 9*GridUnit - ControlSpacing, yPos },
+      Size = { GridUnit, 4*GridUnit },
+      CornerRadius = 0, ShowTextbox = false,
+      PrettyName = ('Stream %d~Channel 2 Peak Level'):format(i)
+    };
+    layout[('Stream %d URL'):format(i)] = {
+      Position = { 10*GridUnit , yPos },
+      Size = { 20*GridUnit, 4*GridUnit },
+      PrettyName = ('Stream %d~URL'):format(i);
+    };
+    layout[('Stream %d Listener Count'):format(i)] = {
+      Position = { 30*GridUnit + ControlSpacing, yPos },
+      Size = { 8*GridUnit - ControlSpacing, 4*GridUnit },
+      PrettyName = ('Stream %d~Listener Count'):format(i);
+    };
+  end;
+
+  return layout, graphics;
+
+end;
+
+-- [[ RUNTIME ]] --
+if(not Controls) then return; end;
+
+-- Properties
+StreamCount = Properties['Stream Count'].Value;
+ServerPort = Properties['Server Port'].Value;
+
+-- Ease-of-access
+MST = {};
+StreamControls = {};
+for i=1,StreamCount do
+  MST[i] = _G[('MST%d'):format(i)];
+  StreamControls[i] = {};
+end; print(('# Enumerated %d media stream transmitters...'):format(#MST));
+for k,c in pairs(Controls) do
+  local stream, control = k:match('^Stream (%d+) (.+)');
+  if(stream) then StreamControls[tonumber(stream)][control] = c; end;
+end; print(('# Enumerated controls for %d streams...'):format(#StreamControls));
+
+-- Configure MSTs
+for i,mst in ipairs(MST) do
+  mst.host.String = '127.0.0.1';
+  mst.port.String = ServerPort - i;
+  print(('# Configured MST #%d, host: %s, port: %s'):format(i, mst.host.String, mst.port.String));
+end;
+
+-- Link meters to MST
+for i,mst in ipairs(MST) do
+  for j=1,2 do
+    mst[('meter.%d'):format(j)].EventHandler = function(c)
+      StreamControls[i][('Channel %d Peak Level'):format(j)].Value = c.Value
+    end;
+  end;
+end;
+
+-- HTTP server
+Sockets = {};
+Server = TcpSocketServer.New();
+Server.EventHandler = function(sock)
+  print('# New HTTP connection.');
+  sock.Data = function()
+    local request = sock:ReadLine(TcpSocket.EOL.Custom, '\r\n\r\n');
+    local url, protocol = request:match('^[^ ]+ ([^ \r\n]+) ([^ \r\n]+)');
+    url = url:lower();
+    print('# Listener requested ' .. url);
+    if(Receiver.List[url]) then
+      sock:Write(protocol .. ' 200 OK\r\nContent-Type: audio/mpeg\r\nicy-name: Q-Sys Audio Stream\r\n\r\n');
+      Sockets[sock] = url;
+    else
+      sock:Write(protocol .. ' 404 Not Found\r\n\r\n');
+    end;
+  end;
+  sock.EventHandler = function(_,evt)
+    Sockets[sock] = nil;
+  end;
+end; Server:Listen(ServerPort);
+print(('# HTTP server listening on port %d...'):format(ServerPort));
+
+-- RTP Receiver
+Receiver = {
+  List = {},
+  New = function(port, stream)
+    U = UdpSocket.New();
+    Receiver.List[stream] = U;
+    U:Open('127.0.0.1', port);
+    U.EventHandler = function(_, t)
+      if(string.byte(t.Data, 2) ~= 0x8E) then return; end; -- only accept MPEG Audio
+      local data = t.Data:sub(17);
+      for sock,url in pairs(Sockets) do
+        if(url == stream) then sock:Write(data); end;
+      end;
+    end; return U;
+  end
+};
+
+-- Configure HTTP streams
+Streams = {};
+for i=1,StreamCount do
+  Streams[i] = {
+    url = ('/stream%d'):format(i),
+    port = ServerPort - i
+  };
+end;
+
+-- Configure receivers
+for _,stream in ipairs(Streams) do Receiver.New(stream.port, stream.url); end;
+print('# Initialisation complete.');
+
+-- URL Display
+UrlTimer = Timer.New();
+UrlTimer.EventHandler = function()
+  for i,stream in ipairs(Streams) do
+    local urls = {};
+    for _, iface in pairs(Network.Interfaces()) do
+      table.insert(urls, ('http://%s:%d%s'):format(iface.Address, ServerPort, stream.url))
+    end; StreamControls[i]['URL'].String = table.concat(urls, '\n');
+  end;
+end; UrlTimer:Start(1);
+
+-- Active Listener Count
+StatsTimer = Timer.New();
+StatsTimer.EventHandler = function()
+  for i,stream in ipairs(Streams) do
+    local listenerCount = 0;
+    for _, url in pairs(Sockets) do
+      if(url == stream.url) then
+        listenerCount = listenerCount + 1;
+      end;
+    end;
+    StreamControls[i]['Listener Count'].String = listenerCount;
+  end;
+end; StatsTimer:Start(1);
