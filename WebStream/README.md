@@ -42,10 +42,10 @@ Tested clients:
 
 ## Performance
 
-Using HTTPerf, this plugin has been loaded up to 1000 simultaneous HTTP connections on a Core 110f.
+Using HTTPerf, this plugin was loaded with 1000 simultaneous HTTP connections on a Core 110f.
 
-Under this load, VLC was able to maintain an uninterrupted stream, disconnect, and reconnect and resume streaming.
+Under this load, VLC was able to maintain an uninterrupted stream, disconnect, reconnect and resume streaming.
 
-Q-Sys script inspector reported approximately 25-30% load at this time, however the core's internal CPU measured 95%.
+Q-Sys' script inspector reported approximately 25-30% load at this time, however the core's CPU core 0 measured 95% utilisation.
 
 On a Core 110f, we recommend maintaining no more than 500 simultaneous HTTP clients.
