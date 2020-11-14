@@ -29,8 +29,6 @@ As such, the number of distinct audio streams is limited by the maximum permissi
 
 However, several users can listen to the same HTTP audio stream.
 
-
-
 ## Validation
 
 Tested clients:
@@ -41,3 +39,13 @@ Tested clients:
  - Mobile Safari (iOS 14.1)
  - VLC Media Player (3.0.8)
  - Windows Media Player (12.0.18362.418)
+
+## Performance
+
+Using HTTPerf, this plugin has been loaded up to 1000 simultaneous HTTP connections on a Core 110f.
+
+Under this load, VLC was able to maintain an uninterrupted stream, disconnect, and reconnect and resume streaming.
+
+Q-Sys script inspector reported approximately 25-30% load at this time, however the core's internal CPU measured 95%.
+
+On a Core 110f, we recommend maintaining no more than 500 simultaneous HTTP clients.
