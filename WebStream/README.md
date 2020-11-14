@@ -1,8 +1,10 @@
-<img src="https://user-images.githubusercontent.com/1059392/99147437-0f35b680-26d5-11eb-91b3-8f38987f407c.png" width="200" />
+<img src="img/logo.png" width="200" />
 
 #
 
 This plugin implements an HTTP MP3 streaming server.
+
+<img src="img/screenshot.png" width="500" />
 
 It may be configured to serve between one and four independent stereo streams.
 
