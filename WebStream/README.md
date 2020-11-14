@@ -11,13 +11,15 @@ It may be configured to serve between one and four independent stereo streams.
 
 The server listens on all network interfaces.
 
+A Q-Sys design can contain multiple instances of this plugin, provided that they use different server ports.
+
 ## Properties
 
 **Stream count** - the number of stereo streams to serve.
 
 **Server port** - the webserver port to listen on for HTTP requests.
 
-
+**Bitrate** - the MP3 bit rate at which to compress audio (default 128kbps)
 
 ## Limitations
 
@@ -33,7 +35,9 @@ However, several users can listen to the same HTTP audio stream.
 
 Tested clients:
 
+ - Q-Sys Media Stream Receiver (8.4.0)
  - Google Chrome (86.0.4240.193)
  - Mozilla Firefox (82.0.3)
  - Mobile Safari (iOS 14.1)
  - VLC Media Player (3.0.8)
+ - Windows Media Player (12.0.18362.418)

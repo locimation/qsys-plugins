@@ -3,7 +3,7 @@
   Q-Sys Web Streaming Plugin
   Author: Michael Goodyear
   Email: michael@locimation.com
-  Version: 1.0.2
+  Version: 1.1.0
   
   Copyright 2020 Locimation Pty Ltd
 
@@ -35,9 +35,9 @@
 
 PluginInfo = {
   Name = 'Locimation~WebStream',
-  Version = '1.0.2',
+  Version = '1.1.0',
   Id = 'd8f36599-f487-410a-9715-436005aee503',
-  Description = 'Initial release'
+  Description = 'Added bitrate control'
 };
 
 function GetColor()
@@ -67,6 +67,29 @@ function GetProperties()
       Min = 1024,
       Max = 65535,
       Value = 8180
+    },
+    {
+      Name = 'Bitrate',
+      Type = 'enum',
+      Value = '128kbps',
+      Choices = {
+        '16kbps',
+        '24kbps',
+        '32kbps',
+        '40kbps',
+        '48kbps',
+        '56kbps',
+        '64kbps',
+        '80kbps',
+        '96kbps',
+        '112kbps',
+        '128kbps',
+        '160kbps',
+        '192kbps',
+        '224kbps',
+        '256kbps',
+        '320kbps'
+      }
     }
   };
 end;
@@ -274,6 +297,7 @@ if(not Controls) then return; end;
 -- Properties
 StreamCount = Properties['Stream Count'].Value;
 ServerPort = Properties['Server Port'].Value;
+Bitrate = Properties['Bitrate'].Value;
 
 -- Ease-of-access
 MST = {};
@@ -291,7 +315,12 @@ end; print(('# Enumerated controls for %d streams...'):format(#StreamControls));
 for i,mst in ipairs(MST) do
   mst.host.String = '127.0.0.1';
   mst.port.String = ServerPort - i;
-  print(('# Configured MST #%d, host: %s, port: %s'):format(i, mst.host.String, mst.port.String));
+  for _,v in pairs(mst['data.rate'].Choices) do
+    if(v:match('(%d+)') == Bitrate:match('(%d+)')) then
+      mst['data.rate'].String = v;
+    end;
+  end;
+  print(('# Configured MST #%d, host: %s, port: %s, bitrate: %s'):format(i, mst.host.String, mst.port.String, mst['data.rate'].String));
 end;
 
 -- Link meters to MST
