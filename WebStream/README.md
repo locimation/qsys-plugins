@@ -1,6 +1,7 @@
 <img src="img/logo.png" width="200" />
 
 #
+![MIT License](https://img.shields.io/badge/license-MIT-blue) [![For production use](https://img.shields.io/badge/stability-prod%20ready-brightgreen)](https://gist.github.com/gdyr/2e54d8afb39d4ea789b4830603ca34b2) [![Uses stable undocumented features](https://img.shields.io/badge/support-stable-green)](https://gist.github.com/gdyr/2e54d8afb39d4ea789b4830603ca34b2)
 
 This plugin implements an HTTP MP3 streaming server.
 
