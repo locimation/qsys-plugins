@@ -1,6 +1,6 @@
 <img src="https://user-images.githubusercontent.com/1059392/99147437-0f35b680-26d5-11eb-91b3-8f38987f407c.png" width="200" />
 
-# WebStream
+#
 
 This plugin implements an HTTP MP3 streaming server.
 
