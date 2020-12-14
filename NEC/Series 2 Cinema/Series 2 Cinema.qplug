@@ -71,6 +71,13 @@ function GetControls(props)
       ControlType = 'Text'
     },
     {
+      Name = 'Port',
+      ControlType = 'Knob',
+      ControlUnit = 'Integer',
+      Min = 1,
+      Max = 65535
+    },
+    {
       Name = 'Error Present',
       ControlType = 'Indicator',
       IndicatorType = 'LED'
@@ -166,9 +173,15 @@ function GetControlLayout(props)
 
   local layout, graphics = {
     ['IP'] = {
-      Position = { 54, 0 },
+      Position = { 54, -16 },
       Size = { 110, 16 },
       Margin = 1
+    },
+    ['Port'] = {
+      Position = { 54, 0 },
+      Size = { 110, 16 },
+      Margin = 1,
+      TextBoxStyle = 'Normal'
     },
     ['Connection'] = {
       Position = { 54, 16 },
@@ -254,9 +267,16 @@ function GetControlLayout(props)
     {
       Type = 'Label',
       HTextAlign = 'Left',
-      Position = { 0, 0 },
+      Position = { 0, -16 },
       Size = { 54, 16 },
       Text = 'IP'
+    },
+    {
+      Type = 'Label',
+      HTextAlign = 'Left',
+      Position = { 0, 0 },
+      Size = { 54, 16 },
+      Text = 'Port'
     },
     {
       Type = 'Label',
@@ -351,8 +371,8 @@ function GetControlLayout(props)
     }
   end;
 
-  for _,c in pairs(layout) do c.Position[2] = c.Position[2] + 75; end;
-  for _,g in pairs(graphics) do g.Position[2] = g.Position[2] + 75; end;
+  for _,c in pairs(layout) do c.Position[2] = c.Position[2] + 91; end;
+  for _,g in pairs(graphics) do g.Position[2] = g.Position[2] + 91; end;
 
   table.insert(graphics, {
     Type = 'Svg',
@@ -373,6 +393,10 @@ function GetControlLayout(props)
 end;
 
 if(not Controls) then return; end;
+
+if(Controls.Port.Value == 1) then
+  Controls.Port.Value = 43728;
+end;
 
 DEBUG = false;
 
@@ -396,10 +420,11 @@ end;
 function reconnect()
   if(Sock.IsConnected) then Sock:Disconnect(); end;
   if(Controls.IP.String == '') then return; end;
-  Sock:Connect(Controls.IP.String, 43728);
+  Sock:Connect(Controls.IP.String, Controls.Port.Value);
   status('blue', 'Connecting...');
 end; reconnect();
 Controls.IP.EventHandler = reconnect;
+Controls.Port.EventHandler = reconnect;
 
 Queries = { -- CKS at end
   ErrNo = '\x02\xBC\x00\x00\x01\x00', -- 3.2
