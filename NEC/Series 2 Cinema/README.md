@@ -1,7 +1,9 @@
 # NEC Digital Cinema Series 2
 *Development of this plugin was sponsored by Sound Vision Technical, LLC*
 
-This module provides control of NEC Series-2 Digital Cinema projectors
+<img src="screenshot.PNG" />
+
+This plugin provides control of NEC Series-2 Digital Cinema projectors
 
 It features:
  - Status Display of

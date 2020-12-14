@@ -1,7 +1,9 @@
 # Dolby SMS Plugin
 *Development of this plugin was sponsored by Sound Vision Technical, LLC*
 
-This module should has been tested against an IMS-2000, but should support:
+<img src="screenshot.PNG" />
+
+This plugin should has been tested against an IMS-2000, but should support:
  - DCP-2000
  - ShowVault/IMB
  - IMS-1000
