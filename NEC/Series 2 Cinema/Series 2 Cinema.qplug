@@ -38,8 +38,8 @@
 
 PluginInfo = {
   Name = "NEC~Digital Cinema~Series 2",
-  Description = "Initial release",
-  Version = "1.0.0",
+  Description = "Added port selection",
+  Version = "1.1.0",
   Id = "d4b7daea-1cad-43d1-abe1-028f38d022af"
 }
 
