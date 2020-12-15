@@ -3,7 +3,7 @@
   Dolby IMS-2000 Control Plugin for Q-SYS
   Author: Michael Goodyear
   Email: michael@locimation.com
-  Version: 1.0.1
+  Version: 1.1.0
 
   Development sponsored by Chase Taylor,
   Sound Vision Technical LLC.
@@ -38,8 +38,8 @@
 
 PluginInfo = {
   Name = "Dolby SMS",
-  Description = "Reconnect bugfix",
-  Version = "1.0.1",
+  Description = "Added verbose debug",
+  Version = "1.1.0",
   Id = "cb3d7f6a-3a9b-467a-aef9-ce72da5b8957"
 }
 
@@ -53,11 +53,17 @@ end;
 function GetProperties()
   return {
       {
-          Name = 'Macro Count',
-          Type = 'integer',
-          Min = 2,
-          Max = 100,
-          Value = 12
+        Name = 'Macro Count',
+        Type = 'integer',
+        Min = 2,
+        Max = 100,
+        Value = 12
+      },
+      {
+        Name = 'Verbose Debug',
+        Type = 'enum',
+        Choices = {'Yes', 'No'},
+        Value = 'No'
       }
   }
 end
@@ -391,6 +397,14 @@ function SoapyHTTP(ep, xml, cb)
     Timeout = 2,
     Data = ([[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v1="http://www.doremilabs.com/dc/dcp/json/v1_0"><soapenv:Header/><soapenv:Body>%s</soapenv:Body></soapenv:Envelope>]]):format(xml),
     EventHandler = function(t,c,d,e,h)
+      if(Properties['Verbose Debug'].Value == 'Yes') then
+        print('< ' .. t.Data);
+        if(c ~= 0) then
+          print('> ' .. c .. ' ' .. json.encode(d));
+        else
+          print('ERROR: ' .. e);
+        end;
+      end;
       if(e and e:match('timed out')) then status('red', 'Disconnected'); return; end;
       if(c == 500 and d:match('not authenticated')) then SESSION = nil; return; end;
       if(c ~= 200) then status('red', 'HTTP Error'); print(t.Url, c,d,e); error('HTTP Error'); return; end;
