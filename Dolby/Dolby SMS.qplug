@@ -3,7 +3,7 @@
   Dolby IMS-2000 Control Plugin for Q-SYS
   Author: Michael Goodyear
   Email: michael@locimation.com
-  Version: 1.0
+  Version: 1.0.1
 
   Development sponsored by Chase Taylor,
   Sound Vision Technical LLC.
@@ -38,8 +38,8 @@
 
 PluginInfo = {
   Name = "Dolby SMS",
-  Description = "Initial release",
-  Version = "1.0.0",
+  Description = "Reconnect bugfix",
+  Version = "1.0.1",
   Id = "cb3d7f6a-3a9b-467a-aef9-ce72da5b8957"
 }
 
@@ -392,7 +392,7 @@ function SoapyHTTP(ep, xml, cb)
     Data = ([[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v1="http://www.doremilabs.com/dc/dcp/json/v1_0"><soapenv:Header/><soapenv:Body>%s</soapenv:Body></soapenv:Envelope>]]):format(xml),
     EventHandler = function(t,c,d,e,h)
       if(e and e:match('timed out')) then status('red', 'Disconnected'); return; end;
-      if(c == 500 and d:match('not authenticated')) then SESSION = nil; reauth(); return; end;
+      if(c == 500 and d:match('not authenticated')) then SESSION = nil; return; end;
       if(c ~= 200) then status('red', 'HTTP Error'); print(t.Url, c,d,e); error('HTTP Error'); return; end;
       local ok, data = pcall(json.decode, d);
       if(ok and cb) then status('green', 'Connected'); cb(data); end;
@@ -401,6 +401,8 @@ function SoapyHTTP(ep, xml, cb)
 end;
 
 function reauth()
+  SESSION = 'inprog';
+  Timer.CallAfter(function() if(SESSION == 'inprog') then SESSION = nil; end; end, 5);
   if(Controls.Username.String == '') then return; end;
   if(Controls.Password.String == '') then return; end;
   SoapyHTTP('SessionManagement', '<v1:Login><username>admin</username><password>1234</password></v1:Login>', function(r)
@@ -449,7 +451,8 @@ PollTimer = Timer.New();
 PollTimer:Start(1);
 PollTimer.EventHandler = function()
   
-  if(not SESSION) then return; end;
+  if(not SESSION) then reauth(); end;
+  if(SESSION == 'inprog') then return; end;
   
   -- Poll Current Status
   SoapyHTTP('SystemOverview', ('<v1:GetSystemOverview><sessionId>%s</sessionId></v1:GetSystemOverview>'):format(SESSION), function(r)
