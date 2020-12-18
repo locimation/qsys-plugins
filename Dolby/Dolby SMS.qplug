@@ -477,8 +477,6 @@ PollTimer.EventHandler = function()
     Controls['Current CPL'].String = r.GetSystemOverviewResponse.playback.cplTitle;
     Controls['Current SPL'].String = r.GetSystemOverviewResponse.playback.splTitle;
     Controls['SPL Position'].Position = r.GetSystemOverviewResponse.playback.splPosition / r.GetSystemOverviewResponse.playback.splDuration;
-    print(r.GetSystemOverviewResponse.playback.splPosition, r.GetSystemOverviewResponse.playback.splDuration,
-      r.GetSystemOverviewResponse.playback.splPosition / r.GetSystemOverviewResponse.playback.splDuration);
     Controls['SPL Status'].String = r.GetSystemOverviewResponse.playback.stateInfo;
   end);
   
