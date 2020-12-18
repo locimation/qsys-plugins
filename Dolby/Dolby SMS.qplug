@@ -3,7 +3,7 @@
   Dolby IMS-2000 Control Plugin for Q-SYS
   Author: Michael Goodyear
   Email: michael@locimation.com
-  Version: 1.1.0
+  Version: 1.1.1
 
   Development sponsored by Chase Taylor,
   Sound Vision Technical LLC.
@@ -38,8 +38,8 @@
 
 PluginInfo = {
   Name = "Dolby SMS",
-  Description = "Added verbose debug",
-  Version = "1.1.0",
+  Description = "Progress bar bugfix",
+  Version = "1.1.1",
   Id = "cb3d7f6a-3a9b-467a-aef9-ce72da5b8957"
 }
 
@@ -127,7 +127,9 @@ function GetControls(props)
     {
       Name = 'SPL Position',
       ControlType = 'Knob',
-      ControlUnit = 'Percent'
+      ControlUnit = 'Percent',
+      Max = 100,
+      Min = 0
     },
     {
       Name = 'SPL Status',
@@ -142,7 +144,9 @@ function GetControls(props)
     {
       Name = 'Ingest Progress',
       ControlType = 'Knob',
-      ControlUnit = 'Percent'
+      ControlUnit = 'Percent',
+      Max = 100,
+      Min = 0
     },
     {
       Name = 'Reboot',
@@ -473,6 +477,8 @@ PollTimer.EventHandler = function()
     Controls['Current CPL'].String = r.GetSystemOverviewResponse.playback.cplTitle;
     Controls['Current SPL'].String = r.GetSystemOverviewResponse.playback.splTitle;
     Controls['SPL Position'].Position = r.GetSystemOverviewResponse.playback.splPosition / r.GetSystemOverviewResponse.playback.splDuration;
+    print(r.GetSystemOverviewResponse.playback.splPosition, r.GetSystemOverviewResponse.playback.splDuration,
+      r.GetSystemOverviewResponse.playback.splPosition / r.GetSystemOverviewResponse.playback.splDuration);
     Controls['SPL Status'].String = r.GetSystemOverviewResponse.playback.stateInfo;
   end);
   
