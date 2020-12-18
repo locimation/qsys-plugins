@@ -3,7 +3,7 @@
   Dolby IMS-2000 Control Plugin for Q-SYS
   Author: Michael Goodyear
   Email: michael@locimation.com
-  Version: 1.1.1
+  Version: 1.1.2
 
   Development sponsored by Chase Taylor,
   Sound Vision Technical LLC.
@@ -39,7 +39,7 @@
 PluginInfo = {
   Name = "Dolby SMS",
   Description = "Progress bar bugfix",
-  Version = "1.1.1",
+  Version = "1.1.2",
   Id = "cb3d7f6a-3a9b-467a-aef9-ce72da5b8957"
 }
 
