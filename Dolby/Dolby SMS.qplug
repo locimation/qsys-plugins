@@ -376,7 +376,7 @@ function GetControlLayout(props)
 
   table.insert(graphics, {
     Type = "Image",
-    Position = { 61,709 },
+    Position = { 61,709+o },
     Size = { 146, 84 },
     Image = SPONSOR
   });
