@@ -1,0 +1,211 @@
+--[[
+
+  Q-Sys String Matching Plugin
+  Author: Michael Goodyear
+  Email: michael@locimation.com
+  Version: 1.0
+  
+  Copyright 2021 Locimation Pty Ltd
+
+  Permission is hereby granted, free of charge,
+  to any person obtaining a copy of this software
+  and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify,
+  merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom
+  the Software is furnished to do so, subject to the
+  following conditions:
+
+  The above copyright notice and this permission
+  notice shall be included in all copies or substantial
+  portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY
+  OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+  LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+  EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+  FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+  AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+  OTHER DEALINGS IN THE SOFTWARE.
+
+]]
+
+PluginInfo = {
+  Name = 'Locimation~Match',
+  Description = "Initial release",
+  Version = "1.0.0",
+  Id = "61e8a3e7-a055-449c-83c4-302d7d33e83b",
+  ShowDebug = false
+}
+
+function GetPrettyName(props)
+  return (props['Match Count'].Value > 1) and 'Multi-match' or 'Match';
+end;
+
+function GetProperties()
+  return {{
+    Name = 'Match Count',
+    Type = 'integer',
+    Min = 1,
+    Max = 100,
+    Value = 1
+  }};
+end;
+
+function GetControls(props)
+  return {
+    {
+      Name = 'Search',
+      ControlType = 'Text',
+      Count = props['Match Count'].Value,
+      UserPin = true,
+      PinStyle = 'Both'
+    },
+    {
+      Name = 'Type',
+      ControlType = 'Text',
+      Count = props['Match Count'].Value,
+      UserPin = true,
+      PinStyle = 'Both'
+    },
+    {
+      Name = 'Matches',
+      ControlType = 'Indicator',
+      IndicatorType = 'LED',
+      Count = props['Match Count'].Value,
+      PinStyle = 'Output'
+    },
+    {
+      Name = 'Input',
+      ControlType = 'Indicator',
+      IndicatorType = 'Text',
+      PinStyle = 'Both'
+    }
+  }
+end;
+
+function GetControlLayout(props)
+  local controls = {
+    Input = {
+      Position = { 16, 26 },
+      Size = { 340, 20 }
+    }
+  };
+
+  local graphics = {
+    {
+      Type = 'Label',
+      Position = { 16, 11 },
+      Size = { 340, 16 },
+      Text = 'Input',
+      HTextAlign = 'Left'
+    },
+    {
+      Type = 'Label',
+      Position = { 16, 64 },
+      Size = { 140, 16 },
+      Text = 'Search',
+      HTextAlign = 'Left'
+    },
+    {
+      Type = 'Label',
+      Position = { 166, 64 },
+      Size = { 100, 16 },
+      Text = 'Type',
+      HTextAlign = 'Left'
+    },
+    {
+      Type = 'Matches',
+      Position = { 276, 64 },
+      Size = { 80, 16 },
+      Text = 'Matches',
+      HTextAlign = 'Left'
+    }
+  }
+
+  local function n(p, i)
+    if(props['Match Count'].Value == 1) then
+      return p;
+    else
+      return ('%s %d'):format(p, i);
+    end;
+  end;
+
+  for i=1,props['Match Count'].Value do
+
+    controls[n('Search', i)] = {
+      Position = { 16, 60 + i * 20 },
+      Size = { 140, 20 },
+      Margin = 1
+    };
+
+    controls[n('Type', i)] = {
+      Style = 'ComboBox',
+      Position = { 166, 60 + i * 20 },
+      Size = { 100, 20 },
+      Margin = 1
+    };
+
+    controls[n('Matches', i)] = {
+      Style = 'Button',
+      Color = { 0, 255, 0 },
+      UnlinkOffColor = true,
+      OffColor = { 124, 0, 0 },
+      Position = { 276, 60 + i * 20 },
+      Size = { 80, 20 },
+      Legend = 'NO',
+      Margin = 1
+    };
+
+  end;
+
+  return controls, graphics;
+
+end;
+
+if(not Controls) then return; end;
+
+-- Setup
+Count = Properties['Match Count'].Value;
+
+Ctls = {};
+for n,c in pairs(Controls) do
+  Ctls[n] = (type(c) == 'table') and c or {c};
+end;
+
+-- UI Helpers
+for _,c in ipairs(Ctls.Type) do
+  c.Choices = {'Exact', 'Pattern'};
+  if(c.String == '') then c.String = 'Exact'; end;
+end;
+
+-- Matching function
+function recheck(i)
+
+  local function match(i)
+    local testString = Controls.Input.String;
+    local matchString = Ctls.Search[i].String;
+    local patternMatch = Ctls.Type[i].String == 'Pattern';
+    if(patternMatch) then return (testString:match(matchString));
+    else return (tostring(testString) == tostring(matchString)) end;
+  end;
+
+  local matches = match(i);
+  Ctls.Matches[i].Boolean = matches;
+  Ctls.Matches[i].Legend = (matches and 'YES' or 'NO');
+
+end;
+
+-- Event Handlers
+Controls.Input.EventHandler = function()
+  for i=1,Count do recheck(i); end;
+end;
+
+for i=1,Count do
+  Ctls.Type[i].EventHandler = function() recheck(i); end;
+  Ctls.Search[i].EventHandler = function() recheck(i); end;
+  recheck(i);
+end;

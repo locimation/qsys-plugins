@@ -2,6 +2,17 @@
 
 A collection of Q-Sys plugins for control logic applications.
 
+## Match
+
+This plugin performs comparison between an input string and any number of "search" strings, outputting a boolean result.
+
+Typical uses include checking that a string is not empty, and fanning-out a single Q-Sys control's value to multiple boolean outputs (e.g. for UCI layer toggles or snapshot triggers).
+
+In the properties, the number of matches to be tested ("Match Count") may be set - it defaults to one, for a single comparison.
+
+Comparisons may be exact, or may use Lua's pattern-matching syntax.
+See [Programming in Lua, 20.2 - Patterns](https://www.lua.org/pil/20.2.html).
+
 ## Stepper
 
 This plugin provides extends a trigger input into a sequence of momentary pulses.
