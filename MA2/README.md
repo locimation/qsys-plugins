@@ -38,7 +38,7 @@ MA2 Fader Executors are represented here in full - all assignable buttons (inclu
 The fader value itself is represented in a compressed format due to the limitations of Q-Sys fader styling.
 
 ## Command Buttons
-<img src="screenshots/cmdbuttons.png" />
+<img src="screenshots/cmdbuttons.PNG" />
 
 Command buttons function simialrly to the "Command Buttons" component built-in to Q-Sys, except for MA2 commands, rather than TCP, UDP or RS232.
 
