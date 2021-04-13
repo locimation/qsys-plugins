@@ -1,6 +1,5 @@
 # MA2 Remote
 
-#
 ![MIT License](https://img.shields.io/badge/license-MIT-blue) [![For production use](https://img.shields.io/badge/stability-prod%20ready-brightgreen)](https://gist.github.com/gdyr/2e54d8afb39d4ea789b4830603ca34b2) [![Uses stable undocumented features](https://img.shields.io/badge/support-stable-brightgreen)](https://gist.github.com/gdyr/2e54d8afb39d4ea789b4830603ca34b2)
 
 This is a control plugin that enables Q-Sys to trigger action buttons, control fader executors, and execute arbitrary commands in a manner analagous to the built-in "Command Buttons".
