@@ -1,0 +1,635 @@
+PluginInfo = 
+{
+  Name = "Blackmagic Smart Videohub",
+  Version = "1.1",
+  Id = "b2fee86e-67e9-476b-ac75-2a036ca8377a",
+  Description = "Control plugin for Blackmagic Smart Videohub switchers",
+  ShowDebug = false
+}
+
+function GetColor()
+  return { 0xF5, 0xBA, 0x5C };
+end;
+
+function GetProperties()
+  return {
+    {
+      Name = 'Size',
+      Type = 'enum',
+      Choices = { '12 x 12', '20 x 20', '40 x 40' },
+      Value = '12 x 12'
+    },
+    {
+      Name = "IP Address",
+      Type = "string"
+    }
+  };
+end;
+
+function getSize(props)
+  local size = props['Size'].Value; 
+
+  return size == '12 x 12' and 12
+    or size == '20 x 20' and 20
+    or size == '40 x 40' and 40;
+
+end;
+
+function GetControls(props)
+  local controls = {
+
+    -- UI controls
+    {
+      Name = "SRC",
+      ControlType = "Button",
+      ButtonType = "Trigger"
+    },
+    {
+      Name = "DEST",
+      ControlType = "Button",
+      ButtonType = "Trigger"
+    },
+    {
+      Name = "Clear",
+      ControlType = "Button",
+      ButtonType = "Trigger"
+    },
+    {
+      Name = "Take",
+      ControlType = "Button",
+      ButtonType = "Trigger"
+    },
+    {
+      Name = "Source",
+      ControlType = "Indicator",
+      IndicatorType = "Text"
+    },
+    {
+      Name = "Destination",
+      ControlType = "Indicator",
+      IndicatorType = "Text"
+    },
+    {
+      Name = "Status",
+      ControlType = "Indicator",
+      IndicatorType = "Status"
+    },
+
+    -- Scalable controls
+    {
+      Name = "Keypad",
+      Count = getSize(props),
+      ControlType = "Button",
+      ButtonType = "Trigger"
+    },
+    {
+      Name = "Selected Input",
+      Count = getSize(props),
+      ControlType = "Text",
+      UserPin = true,
+      PinStyle = "Both"
+    },
+    {
+      Name = "Active Input",
+      Count = getSize(props),
+      ControlType = "Indicator",
+      IndicatorType = "Text",
+      UserPin = true,
+      PinStyle = "Output"
+    }
+
+  };
+
+  if(getSize(props) == 20) then
+    table.insert(controls, {
+      Name = "Dummy20",
+      ControlType = "Button",
+      ButtonType = "Trigger"
+    });
+  end;
+
+  if(getSize(props) == 40) then
+    table.insert(controls, {
+      Name = "Dummy40b",
+      ControlType = "Button",
+      ButtonType = "Trigger"
+    });
+    table.insert(controls, {
+      Name = "Dummy40a",
+      ControlType = "Button",
+      ButtonType = "Trigger"
+    });
+  end;
+
+  return controls;
+
+end;
+
+function GetControlLayout(props)
+
+  local size = getSize(props);
+
+  local controls, graphics = {}, {
+
+    { -- Outer box
+      Type = "GroupBox",
+      StrokeWidth = 1,
+      CornerRadius = 8,
+      Fill = { 0x66, 0x66, 0x66 },
+      StrokeColor = {0,0,0},
+      Size = {817, (size == 40) and 186 or 93},
+      Position = {0,0}
+    },
+
+    { -- Rackmounting holes
+      Type = "GroupBox",
+      StrokeWidth = 1,
+      CornerRadius = 7,
+      Fill = { 0xEB, 0xF5, 0xFC },
+      StrokeColor = {0,0,0},
+      Size = {27,13},
+      Position = {6, 4}
+    },
+    {
+      Type = "GroupBox",
+      StrokeWidth = 1,
+      CornerRadius = 7,
+      Fill = { 0xEB, 0xF5, 0xFC },
+      StrokeColor = {0,0,0},
+      Size = {27,13},
+      Position = {785, 4}
+    },
+    {
+      Type = "GroupBox",
+      StrokeWidth = 1,
+      CornerRadius = 7,
+      Fill = { 0xEB, 0xF5, 0xFC },
+      StrokeColor = {0,0,0},
+      Size = {27,13},
+      Position = {6, (size == 40) and 168 or 75}
+    },
+    {
+      Type = "GroupBox",
+      StrokeWidth = 1,
+      CornerRadius = 7,
+      Fill = { 0xEB, 0xF5, 0xFC },
+      StrokeColor = {0,0,0},
+      Size = {27,13},
+      Position = {785, (size == 40) and 168 or 75}
+    },
+
+    { -- Front panel
+      Type = "GroupBox",
+      StrokeWidth = 1,
+      CornerRadius = 0,
+      Fill = { 0x99, 0x99, 0x99 },
+      StrokeColor = {0,0,0},
+      Size = {733, (size == 40 and 186 or 93)},
+      Position = {45,0}
+    },
+
+    { -- LCD Screen
+      Type = "GroupBox",
+      StrokeWidth = 1,
+      CornerRadius = 8,
+      Fill = { 0xCC, 0xCC, 0xCC },
+      StrokeColor = {0,0,0},
+      Size = (size == 40 and {222, 121} or {147,80}),
+      Position = {623 - (size == 40 and 77 or 0),7 + (size == 40 and 26 or 0)}
+    },
+
+    { -- Smart Videohub
+      Type = "Label",
+      Text = "Smart Videohub",
+      TextSize = 16,
+      HTextAlign = "left",
+      IsBold = true,
+      Size = {115,30},
+      Color = { 0xFF, 0xFF, 0xFF },
+      Position = {64,(size == 40 and 46 or 0) + 32}
+    },
+
+    { -- Size
+      Type = "Label",
+      Text = props['Size'].Value,
+      TextSize = 16,
+      HTextAlign = "Left",
+      Size = {52,30},
+      Color = { 0xCC, 0xCC, 0xCC },
+      Position = {181,(size == 40 and 46 or 0) + 32}
+    },
+
+    { -- Source label
+      Type = "Label",
+      Text = "Source",
+      TextSize = 10,
+      HTextAlign = "Left",
+      VTextAlign = "Bottom",
+      Size = {80,13},
+      Color = { 0x99, 0x99, 0x99 },
+      Position = {633 - (size == 40 and 38 or 0), 13 + (size == 40 and 41 or 0)}
+    },
+
+    { -- Destination label
+      Type = "Label",
+      Text = "Destination",
+      TextSize = 10,
+      HTextAlign = "Left",
+      VTextAlign = "Bottom",
+      Size = {80,13},
+      Color = { 0x99, 0x99, 0x99 },
+      Position = {633 - (size == 40 and 38 or 0), 47 + (size == 40 and 41 or 0)}
+    },
+
+  };
+
+  controls['Source'] = {
+    Style = "Text",
+    TextBoxStyle = "NoBackground",
+    Position = {633 - (size == 40 and 38 or 0), 18 + (size == 40 and 41 or 0)},
+    Size = {128,33},
+    VTextAlign = "Bottom",
+    TextFontSize = 18,
+    Color = {0,0,0},
+    IsBold = true
+  };
+
+  controls['Destination'] = {
+    Style = "Text",
+    TextBoxStyle = "NoBackground",
+    Position = {633 - (size == 40 and 38 or 0), 53 + (size == 40 and 41 or 0)},
+    Size = {128,33},
+    VTextAlign = "Bottom",
+    TextFontSize = 18,
+    Color = {0,0,0},
+    IsBold = true
+  };
+
+  controls['Status'] = {
+    Style = "Text",
+    Color = { 0x66, 0x66, 0x66 },
+    Position = {623 - (size == 40 and 77 or 0),7 + (size == 40 and 26 or 0)},
+    Size = (size == 40 and {222, 121} or {147,80}),
+    TextSize = 10,
+    UserPin = true,
+    PinStyle = "Output"
+  };
+
+  controls['Take'] = {
+    Style = "Button",
+    ButtonType = "Trigger",
+    Legend = "TAKE",
+    UnlinkOffColor = true,
+    OffColor = { 0xCC, 0xCC, 0xCC },
+    Color = { 0xFF, 0xFF, 0xFF },
+    Position = size == 40 and {503, 136} or {559,58},
+    Size = {36,22}
+  };
+
+  controls['Clear'] = {
+    Style = "Button",
+    ButtonType = "Trigger",
+    Legend = "CLEAR",
+    UnlinkOffColor = true,
+    OffColor = { 0xCC, 0xCC, 0xCC },
+    Color = { 0xFF, 0xFF, 0xFF },
+    Position = size == 40 and {503, 114} or {523,58},
+    Size = {36,22}
+  };
+
+  controls['DEST'] = {
+    Style = "Button",
+    ButtonType = "Trigger",
+    Legend = "DEST",
+    UnlinkOffColor = true,
+    OffColor = { 0xCC, 0xCC, 0xCC },
+    Color = { 0xFF, 0xFF, 0xFF },
+    Position = size == 40 and {503, 92} or {523,36},
+    Size = {36,22}
+  };
+
+  controls['SRC'] = {
+    Style = "Button",
+    ButtonType = "Trigger",
+    Legend = "SRC",
+    UnlinkOffColor = true,
+    OffColor = { 0xCC, 0xCC, 0xCC },
+    Color = { 0xFF, 0xFF, 0xFF },
+    Position = size == 40 and {503, 70} or {523,14},
+    Size = {36,22}
+  };
+
+  for i=getSize(props),1,-1 do
+    local j = getSize(props)-i + (getSize(props) == 20 and 1 or getSize(props) == 40 and 2 or 0);
+    controls['Keypad '..i] = {
+      Style = "Button",
+      ButtonType = "Trigger",
+      Legend = tostring(i),
+      UnlinkOffColor = true,
+      OffColor = { 0xCC, 0xCC, 0xCC },
+      Color = { 0xFF, 0xFF, 0xFF },
+      Position = {(size == 40 and -20 or 0) + 487-math.floor(j/(size == 40 and 6 or 3))*36, ((size == 40) and 78 or 0) + 58-(j % (size == 40 and 6 or 3))*22},
+      Size = {36,22}
+    }
+  end;
+
+  controls['Dummy20'] = {
+    Style = "Button",
+    ButtonType = "Trigger",
+    Legend = '',
+    UnlinkOffColor = true,
+    OffColor = { 0xCC, 0xCC, 0xCC },
+    Color = { 0xFF, 0xFF, 0xFF },
+    Position = {487, 58},
+    Size = {36,22}
+  }
+
+  controls['Dummy40a'] = {
+    Style = "Button",
+    ButtonType = "Trigger",
+    Legend = '',
+    UnlinkOffColor = true,
+    OffColor = { 0xCC, 0xCC, 0xCC },
+    Color = { 0xFF, 0xFF, 0xFF },
+    Position = {467, 114},
+    Size = {36,22}
+  }
+
+  controls['Dummy40b'] = {
+    Style = "Button",
+    ButtonType = "Trigger",
+    Legend = '',
+    UnlinkOffColor = true,
+    OffColor = { 0xCC, 0xCC, 0xCC },
+    Color = { 0xFF, 0xFF, 0xFF },
+    Position = {467, 136},
+    Size = {36,22}
+  }
+
+  -- Hide control pin controls
+  for i=1,getSize(props) do
+    controls['Active Input ' .. i] = {
+      Size = {0,0},
+      Position = {0,0},
+      Style = "Text",
+      TextBoxStyle = "NoBackground",
+      StrokeWidth = 0
+    };
+    controls['Selected Input ' .. i] = {
+      Size = {0,0},
+      Position = {0,0},
+      Style = "Text",
+      TextBoxStyle = "NoBackground",
+      StrokeWidth = 0
+    };
+  end;
+
+  return controls, graphics;
+
+end;
+
+if(Controls) then
+
+  Videohub = TcpSocket.New();
+  Videohub.ReadTimeout = 0.5;
+
+  -- Queue responses from VideoHub
+  Videohub.EventHandler = function(sock, evt, err)
+    if(evt == TcpSocket.Events.Data) then
+      local block = sock:ReadLine(TcpSocket.EOL.Custom, "\n\n");
+      while(block ~= nil) do
+        parseBlock(block);
+        block = sock:ReadLine(TcpSocket.EOL.Custom, "\n\n");
+      end;
+    elseif(evt == TcpSocket.Events.Connected) then
+      PreambleReceived = false;
+    elseif(evt == TcpSocket.Events.Reconnect) then  
+      updateStatus(5, 'Connecting...');
+    elseif(evt == TcpSocket.Events.Closed) then
+      updateStatus(2, 'Closed by remote');
+    elseif(evt == TcpSocket.Events.Error) then
+      updateStatus(2, 'Closed by error');
+    elseif(evt == TcpSocket.Events.Timeout) then
+      updateStatus(2, 'Timeout');
+    end;
+  end;
+
+  PingTimer = Timer.New();
+  PingTimer.EventHandler = function()
+    if(Videohub.IsConnected and PreambleReceived) then
+      Videohub:Write('PING:\n\n');
+    end;
+  end;
+  PingTimer:Start(0.1);
+
+  function parseBlock(block)
+    if(block == 'ACK' or block == 'NAK') then return end; -- use async
+    local blockType, blockData = block:match('^([^:]+):\n?(.*)');
+    if(blockType == 'VIDEO OUTPUT ROUTING') then
+      for dst,src in blockData:gmatch('(%d+) (%d+)') do
+        CURRENT_ROUTING[dst+1] = src+1;
+      end;
+    elseif(blockType == 'INPUT LABELS') then
+      for src,label in blockData:gmatch('(%d+) ([^\n]+)') do
+        INPUT_NAMES[src+1] = label;
+      end;
+    elseif(blockType == 'OUTPUT LABELS') then
+      for dst,label in blockData:gmatch('(%d+) ([^\n]+)') do
+        OUTPUT_NAMES[dst+1] = label;
+      end;
+    elseif(
+      blockType == 'PROTOCOL PREAMBLE' or
+      blockType == 'VIDEO OUTPUT LOCKS' or
+      blockType == 'CONFIGURATION'
+    ) then
+      -- ignore
+    elseif(blockType == 'VIDEOHUB DEVICE') then
+      local modelName = blockData:match('Model name: ([^\n]+)');
+      print('Connected to ' .. modelName);
+      PreambleReceived = true;
+    elseif(blockType == 'END PRELUDE') then
+      updateStatus(0, '');
+    else
+      print(block);
+    end;
+    updateViews();
+  end;
+
+  function route(from, to)
+    if(not Videohub.IsConnected) then return; end;
+    Videohub:Write('VIDEO OUTPUT ROUTING:\n' .. (to-1) .. ' ' .. (from-1) .. '\n\n');
+  end;
+
+  function pushRouting()
+    if(not Videohub.IsConnected) then return end;
+    for to,from in pairs(CURRENT_ROUTING) do
+      if(from ~= tonumber(Controls['Selected Input'][to].String)) then
+        route(Controls['Selected Input'][to].String, to);
+      end;
+    end;
+  end;
+
+  PushTimer = Timer.New();
+  PushTimer.EventHandler = pushRouting;
+  PushTimer:Start(0.5);
+
+  -- State
+  CURRENTLY_SELECTED_DESTINATION = 1;
+  CURRENTLY_SELECTED_SOURCE = 1;
+  CURRENT_ROUTING = {};
+  INPUT_NAMES = {};
+  OUTPUT_NAMES = {};
+  KEYPAD_MODE = 'CLEAR';
+
+  function keyPress(i)
+    if(KEYPAD_MODE == 'DEST') then
+      CURRENTLY_SELECTED_DESTINATION = i;
+      CURRENTLY_SELECTED_SOURCE = CURRENT_ROUTING[i];
+    elseif(KEYPAD_MODE == 'SRC') then
+      CURRENTLY_SELECTED_SOURCE = i;
+    end;
+    updateViews();
+  end;
+
+  -- UI stuff
+  function updateDisplay()
+
+    local outputLabel = OUTPUT_NAMES[CURRENTLY_SELECTED_DESTINATION] and
+      OUTPUT_NAMES[CURRENTLY_SELECTED_DESTIANTION] or ('Output ' .. CURRENTLY_SELECTED_DESTINATION);
+    Controls['Destination'].String = outputLabel;
+    
+    local currentInput = CURRENT_ROUTING[CURRENTLY_SELECTED_DESTINATION];
+    local inputLabel = currentInput and (INPUT_NAMES[currentInput] and
+      INPUT_NAMES[currentInput] or 'Input ' .. currentInput) or '';
+    Controls['Source'].String = inputLabel;
+    
+  end;
+
+  function updateModeButtons()
+    Controls['SRC'].Color = (KEYPAD_MODE == 'SRC') and 'white' or '#CCCCCC';
+    Controls['DEST'].Color = (KEYPAD_MODE == 'DEST') and 'white' or '#CCCCCC';
+  end;
+
+  function updateKeypadButtons()
+    local currentSelection =
+      KEYPAD_MODE == 'SRC' and CURRENTLY_SELECTED_SOURCE or
+      KEYPAD_MODE == 'DEST' and CURRENTLY_SELECTED_DESTINATION or
+      '';
+    for i,c in pairs(Controls['Keypad']) do
+      c.Color = (currentSelection == i) and 'white' or '#CCCCCC';
+    end;
+  end;
+
+  FlashTimer = Timer.New();
+  FlashTimer.EventHandler = function()
+    if(Controls['Take'].Color == 'red') then
+      Controls['Take'].Color = '#CCCCCC';
+    else
+      Controls['Take'].Color = 'red';
+    end;
+  end;
+  function updateTakeClearButtons()
+    if(KEYPAD_MODE == 'SRC' and
+      CURRENTLY_SELECTED_SOURCE ~= CURRENT_ROUTING[CURRENTLY_SELECTED_DESTINATION])
+    then
+      FlashTimer:Start(0.25);
+      Controls['Clear'].Color = 'white';
+    else
+      FlashTimer:Stop();
+      Controls['Take'].Color = '#CCCCCC';
+      Controls['Clear'].Color = '#CCCCCC';
+    end;
+  end;
+
+  function updateControlPins()
+    for i,c in pairs(CURRENT_ROUTING) do
+      Controls['Active Input'][i].String = CURRENT_ROUTING[i];
+      if(Controls['Selected Input'][i].String == '') then
+        Controls['Selected Input'][i].String = CURRENT_ROUTING[i];
+      end;
+    end;
+  end;
+
+  function updateViews()
+    updateDisplay();
+    updateModeButtons();
+    updateControlPins();
+    updateKeypadButtons();
+    updateTakeClearButtons();
+  end;
+
+  function toggleMode(mode)
+    if(KEYPAD_MODE == mode) then  
+      KEYPAD_MODE = 'CLEAR';
+    else
+      KEYPAD_MODE = mode;
+    end;
+    updateViews();
+  end;
+
+  function updateStatus(value, string)
+    Controls['Status'].Value = value;
+    Controls['Status'].String = string;
+    Controls['Status'].IsInvisible = (value == 0);
+  end;
+
+  for i,c in pairs(Controls['Keypad']) do
+    c.EventHandler = function()
+      keyPress(i);
+    end;
+  end;
+
+  Controls['SRC'].EventHandler = function()
+    CURRENTLY_SELECTED_SOURCE = CURRENT_ROUTING[CURRENTLY_SELECTED_DESTINATION];
+    toggleMode('SRC');
+  end; 
+  Controls['DEST'].EventHandler = function() toggleMode('DEST'); end;
+
+  Controls['Clear'].EventHandler = function()
+    KEYPAD_MODE = 'CLEAR'; updateViews();
+  end;
+
+  Controls['Take'].EventHandler = function()
+    if(KEYPAD_MODE == 'SRC' and
+      CURRENTLY_SELECTED_SOURCE ~= CURRENT_ROUTING[CURRENTLY_SELECTED_DESTINATION])
+    then
+      KEYPAD_MODE = 'CLEAR';
+      Controls['Selected Input'][CURRENTLY_SELECTED_DESTINATION].String = CURRENTLY_SELECTED_SOURCE;
+      pushRouting();
+      updateViews(); 
+    end;
+  end;
+
+  for _,c in pairs(Controls['Selected Input']) do
+    local choices = {};
+    for i=1,#Controls['Keypad'] do table.insert(choices, i); end;
+    c.EventHandler = pushRouting;
+    c.Choices = choices;
+  end;
+
+  Controls['Source'].String = '';
+  Controls['Destination'].String = '';
+
+  for i=1,getSize(Properties) do
+    Controls['Active Input'][i].IsInvisible = true;
+    Controls['Selected Input'][i].IsInvisible = true;
+  end;
+
+  if(Properties['IP Address'].Value ~= '') then
+    updateStatus(5, '');
+    Videohub:Connect(Properties['IP Address'].Value, 9990);
+  else
+    updateStatus(3, '\nPlease set IP address.');
+    for i=1,getSize(Properties) do
+      Controls['Keypad'][i].IsDisabled = true;
+    end;
+    Controls['SRC'].IsDisabled = true;
+    Controls['DEST'].IsDisabled = true;
+    Controls['Clear'].IsDisabled = true;
+    Controls['Take'].IsDisabled = true;
+    if(getSize(Properties) == 20) then
+      Controls['Dummy'].IsDisabled = true;
+    end;
+  end;
+
+end;
