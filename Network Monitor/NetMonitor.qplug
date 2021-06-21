@@ -1,0 +1,363 @@
+--[[
+
+  Network Link Monitor Plugin for Q-SYS
+  Author: Michael Goodyear
+  Email: michael@locimation.com
+  Version: 1.3.0
+  
+  (C) Copyright 2020 Locimation Pty Ltd
+
+  Permission is hereby granted, free of charge,
+  to any person obtaining a copy of this software
+  and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify,
+  merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom
+  the Software is furnished to do so, subject to the
+  following conditions:
+
+  The above copyright notice and this permission
+  notice shall be included in all copies or substantial
+  portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY
+  OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+  LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+  EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+  FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+  AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+  OTHER DEALINGS IN THE SOFTWARE.
+
+]]
+
+PluginInfo = {
+  Name = "Locimation~Network Link Monitor",
+  Description = "Added link error suppression",
+  Version = "1.3.0",
+  Id = "ed832ccd-663e-4b41-8be9-9c182550b6a0"
+}
+
+MIT_FOOTER = 'iVBORw0KGgoAAAANSUhEUgAAA4QAAAAoCAYAAACmeDQzAAAACXBIWXMAAAsTAAALEwEAmpwYAAAG8WlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDIgNzkuMTY0MzUyLCAyMDIwLzAxLzMwLTE1OjUwOjM4ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjEuMSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDIwLTAzLTI1VDAzOjU5OjAxKzExOjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyMC0wNC0xOVQxNDowODozOSsxMDowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMC0wNC0xOVQxNDowODozOSsxMDowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDowMjRkYTUxZS00NDA0LTIzNDktOGI1Mi1lZTA5NmJkMTc4ZDQiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDozNWYzZWI2YS1lMzYzLWJmNGEtOWJjOS01MTU1NjU1NTVmZGQiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDphYmI1NDFmOS1lOGFlLTBiNDgtYWY4MC0xYThiNGEyOTFhMjkiPiA8cGhvdG9zaG9wOlRleHRMYXllcnM+IDxyZGY6QmFnPiA8cmRmOmxpIHBob3Rvc2hvcDpMYXllck5hbWU9IlByb2R1Y2VkIGJ5ICAgICAgICAgICAgICAgICAgICAgICAgYW5kIGRpc3RyaWJ1dGVkIHVuZGVyIE1JVCBsaSIgcGhvdG9zaG9wOkxheWVyVGV4dD0iUHJvZHVjZWQgYnkgICAgICAgICAgICAgICAgICAgICAgICBhbmQgZGlzdHJpYnV0ZWQgdW5kZXIgTUlUIGxpY2Vuc2UuIi8+IDwvcmRmOkJhZz4gPC9waG90b3Nob3A6VGV4dExheWVycz4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDphYmI1NDFmOS1lOGFlLTBiNDgtYWY4MC0xYThiNGEyOTFhMjkiIHN0RXZ0OndoZW49IjIwMjAtMDMtMjVUMDM6NTk6MDErMTE6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMS4xIChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MDI0ZGE1MWUtNDQwNC0yMzQ5LThiNTItZWUwOTZiZDE3OGQ0IiBzdEV2dDp3aGVuPSIyMDIwLTA0LTE5VDE0OjA4OjM5KzEwOjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjEuMSAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPC9yZGY6U2VxPiA8L3htcE1NOkhpc3Rvcnk+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3Jk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';
+
+function GetPrettyName()
+  return "Net Link Monitor v" .. PluginInfo.Version;
+end;
+
+function GetColor()
+  return {0x6F,0x55,0x9D};
+end;
+
+function GetProperties()
+  return {
+    {
+      Name = 'Link Count',
+      Type = 'integer',
+      Min = 4,
+      Max = 24,
+      Value = 8
+    },
+    {
+      Name = 'Poll Interval',
+      Type = 'double',
+      Min = 0.3,
+      Max = 120,
+      Value = 0.3
+    },
+    {
+      Name = 'Packet Interval',
+      Type = 'double',
+      Min = 0.01,
+      Max = 0.5,
+      Value = 0.01
+    }
+  }
+end;
+
+function GetControls(props)
+
+  return {
+    { Name = 'IP', ControlType = 'Text' },
+    { Name = 'Name', ControlType = 'Indicator', IndicatorType = 'Text', UserPin = true, PinStyle = 'Output', PrettyName = 'System~Name' },
+    { Name = 'Model', ControlType = 'Indicator', IndicatorType = 'Text', UserPin = true, PinStyle = 'Output', PrettyName = 'System~Model' },
+    { Name = 'Contact', ControlType = 'Indicator', IndicatorType = 'Text', UserPin = true, PinStyle = 'Output', PrettyName = 'System~Contact' },
+    { Name = 'Link Index', ControlType = 'Text', Count = props['Link Count'].Value },
+    {
+      Name = 'Link Up',
+      ControlType = 'Indicator',
+      IndicatorType = 'Led',
+      Count = props['Link Count'].Value,
+      UserPin = true,
+      PinStyle = 'Output'
+    },
+    {
+      Name = 'Suppress',
+      ControlType = 'Button',
+      ButtonType = 'Toggle',
+      Count = props['Link Count'].Value,
+      UserPin = true,
+      PinStyle = 'Output'
+    },
+    {
+      Name = 'Status',
+      ControlType = 'Indicator',
+      IndicatorType = 'Status',
+      UserPin = true,
+      PinStyle = 'Output',
+      PrettyName = 'System~Status'
+    },
+    {
+      Name = 'Reachable',
+      ControlType = 'Indicator',
+      IndicatorType = 'Led',
+      UserPin = true,
+      PinStyle = 'Output',
+      PrettyName = 'System~Reachable'
+    }
+  }
+
+end;
+
+function GetControlLayout(props)
+  local width = props['Link Count'].Value * 36;
+  local controls = {
+    ['Name'] = {
+      Position = { 100, 80 },
+      Size = { width, 16 },
+      Margin = 1
+    },
+    ['Reachable'] = {
+      Position = { 100, 96 },
+      Size = { 16, 16 },
+      Color = { 0, 255, 0 },
+      UnlinkOffColor = true,
+      OffColor = { 124, 0, 0 },
+      Margin = 3
+    },
+    ['Status'] = {
+      Position = { 116, 96 },
+      Size = { width - 16, 16 },
+      Margin = 1
+    },
+    ['Model'] = {
+      Position = { 100, 112 },
+      Size = { width, 16 },
+      Margin = 1
+    },
+    ['Contact'] = {
+      Position = { 100, 128 },
+      Size = { width, 16 },
+      Margin = 1
+    },
+    ['IP'] = {
+      Position = { 100, 144 },
+      Size = { width, 16 },
+      Margin = 1
+    };
+  }
+  for i=1,props['Link Count'].Value do
+    controls[('Link Index %d'):format(i)] = {
+      Position = { 100 + (i-1) * 36, 160 },
+      Size = { 36, 16 },
+      Margin = 1
+    };
+    controls[('Link Up %d'):format(i)] = {
+      Position = { 100 + (i-1) * 36, 176 },
+      Size = { 36, 16 },
+      Color = { 0, 255, 0 },
+      UnlinkOffColor = true,
+      OffColor = { 124, 0, 0 },
+      Style = 'Button',
+      Margin = 1,
+      UserPin = true,
+      PinStyle = 'Output',
+      PrettyName = ('Link Up~%d'):format(i),
+      ButtonVisualStyle = 'Flat'
+    };
+    controls[('Suppress %d'):format(i)] = {
+      Position = { 100 + (i-1) * 36, 192 },
+      Size = { 36, 16 },
+      Color = { 0xEF, 0x9C, 0x00 },
+      CornerRadius = 3,
+      Style = 'Button',
+      Margin = 1,
+      UserPin = true,
+      PinStyle = 'Output',
+      PrettyName = ('Suppress~Link %d'):format(i),
+    };
+  end;
+
+  local graphicsWidth = math.max(450, width + 85 + 32);
+
+  local graphics = {
+    { Type = 'GroupBox', Position = { 0, 0 }, Size = { graphicsWidth, 256 }, Fill = { 0xFF, 0xFF, 0xFF } },
+    { Type = 'Label', Text = 'Name',    Position = { 15,  80 }, Size = { 80, 16 }, HTextAlign = 'Left' },
+    { Type = 'Label', Text = 'Status',  Position = { 15,  96 }, Size = { 80, 16 }, HTextAlign = 'Left' },
+    { Type = 'Label', Text = 'Model',   Position = { 15, 112 }, Size = { 80, 16 }, HTextAlign = 'Left' },
+    { Type = 'Label', Text = 'Contact', Position = { 15, 128 }, Size = { 80, 16 }, HTextAlign = 'Left' },
+    { Type = 'Label', Text = 'IP',      Position = { 15, 144 }, Size = { 80, 16 }, HTextAlign = 'Left' },
+    { Type = 'Label', Text = 'Link Index',  Position = { 15, 160 }, Size = { 80, 16 }, HTextAlign = 'Left' },
+    { Type = 'Label', Text = 'Link Up',     Position = { 15, 176 }, Size = { 80, 16 }, HTextAlign = 'Left' },
+    { Type = 'Label', Text = 'Suppress',    Position = { 15, 192 }, Size = { 80, 16 }, HTextAlign = 'Left' },
+    {
+      Type = 'Image',
+      Position = { math.max(0, (graphicsWidth - 450) / 2), 224 },
+      Size = { 450, 20 },
+      Image = MIT_FOOTER
+    },
+    {
+      Type = 'GroupBox',
+      Position = { 0,  0 },
+      Size = { graphicsWidth, 56 },
+      Fill = { 0xEE, 0xEE, 0xEE }
+    },
+    {
+      Type = 'Label',
+      Text = 'Network Link Monitor v' .. PluginInfo.Version,
+      FontSize = 24,
+      Position = { 14,  0 },
+      Size = { graphicsWidth - 28, 56 },
+      HTextAlign = 'Left',
+      FontStyle = 'Light'
+    },
+  }
+
+  return controls, graphics;
+
+end;
+
+if(not Controls) then return; end;
+
+-- [[ Control mapping ]] --
+MAPS = {
+  ['iso.3.6.1.2.1.1.5.0'] = 'Name',
+  ['iso.3.6.1.2.1.1.4.0'] = 'Contact',
+  ['iso.3.6.1.2.1.1.1.0'] = 'Model'
+}
+
+-- [[ SNMP client ]] --
+function ipChange()
+  Device = SNMPSession.New(SNMP.SessionType.V2c);
+  Device:setCommunity('public');
+  Device:setHostName(Controls.IP.String);
+  Device:startSession();
+  Device.ErrorHandler = function(r) print('ERROR', require('json').encode(r)); end;
+  Device.EventHandler = function(r)
+
+    LAST_REPLY = os.time();
+  
+    -- Mapped controls
+    if(MAPS[r.OID]) then
+      local ctl = MAPS[r.OID];
+      local val = r.Value:match('^"(.*)"$') or r.Value;
+      Controls[ctl].String = val;
+      return;
+    end;
+    
+    -- Interface operational status
+    if(r.OID:match('^iso%.3%.6%.1%.2%.1%.2%.2%.1%.8%.')) then
+      local id = r.OID:match('(%d+)$');
+      for i,c in ipairs(Controls['Link Index']) do
+        if(c.String == id) then
+          Controls['Link Up'][i].Value = (r.Value == '1');
+        end;
+      end;
+    end;
+    
+  end; sysPoll()
+end;
+Controls.IP.EventHandler = ipChange;
+
+Q = {};
+QTimer = Timer.New();
+QTimer.EventHandler = function()
+  local item = table.remove(Q, 1);
+  if(item) then Device:getRequest(item); end;
+end;
+QTimer:Start(Properties['Packet Interval'].Value);
+function q(oid) table.insert(Q, oid); end;
+
+-- [[ System Info Polling ]] --
+function sysPoll()
+  for oid, ctl in pairs(MAPS) do
+    Device:getRequest(oid);
+  end;
+end;
+SysPollTimer = Timer.New();
+SysPollTimer.EventHandler = sysPoll;
+SysPollTimer:Start(60);
+
+-- [[ Link State Polling ]] --
+LinkPollTimer = Timer.New();
+LinkPollTimer.EventHandler = function()
+  if(not Controls.Reachable.Boolean) then sysPoll(); end;
+  for _,c in pairs(Controls['Link Index']) do
+    if(c.String ~= '' and tonumber(c.String)) then
+      q('iso.3.6.1.2.1.2.2.1.8.' .. c.String);
+    end;
+  end;
+end;
+LinkPollTimer:Start(Properties['Poll Interval'].Value);
+
+-- [[ Reachability check ]] --
+StatusTimer = Timer.New();
+StatusTimer.EventHandler = function()
+  if(Controls.IP.String == '') then
+    Controls.Status.Value = 6;
+    Controls.Status.String = 'IP not set';
+    Controls.Reachable.Boolean = false;
+    for _,c in ipairs(Controls['Link Up']) do c.Boolean = false; end;
+    return;
+  end;
+  if(#Q > 100) then
+    Controls.Status.Value = 1;
+    Controls.Status.String = 'Overrun - reduce polling rate';
+    return;
+  end;
+  local time_since_last_reply = os.time() - (LAST_REPLY or 1);
+  local currently_replying = (time_since_last_reply < (Properties['Poll Interval'].Value * 2));
+  Controls.Reachable.Boolean = currently_replying;
+  if(not currently_replying) then
+    Controls.Status.Value = 4;
+  else
+    local downedLinks = {};
+    for i,c in ipairs(Controls['Link Index']) do
+      if(c.String ~= '' and not Controls['Link Up'][i].Boolean) then
+        if(not Controls['Suppress'][i].Boolean) then
+          table.insert(downedLinks, Controls['Link Index'][i].String);
+        end;
+      end;
+    end;
+    if(#downedLinks == 0) then
+      Controls.Status.Value = 0;
+    else
+      Controls.Status.Value = 2;
+      Controls.Status.String = string.format(
+        'Link%s %s %s down',
+        (#downedLinks > 1 and 's' or ''),
+        table.concat(downedLinks, ', '),
+        (#downedLinks > 1 and 'are' or 'is')
+      );
+    end;
+  end;
+  print('Queue length: ' .. #Q);
+end;
+StatusTimer:Start(1);
+
+-- [[ Disable unused link states ]] --
+DisableTimer = Timer.New();
+DisableTimer.EventHandler = function()
+  for i,c in ipairs(Controls['Link Index']) do
+    local blank = (c.String == '');
+    local number = (tonumber(c.String) ~= nil);
+    local invalid = ((not blank) and (not number));
+    c.Color = invalid and 'red' or 'white';
+    Controls['Link Up'][i].IsDisabled = blank or invalid;
+  end;
+end;
+DisableTimer:Start(0.1);
+
+-- start
+ipChange();
