@@ -5,7 +5,7 @@
 This is a control plugin that enables Q-Sys to monitor the reachability and operational link state of network devices (such as switches and routers) that make use if the IF-MIB and SNMP v2c.
 
 
-<img src="ui.PNG" />
+<img src="ui.png" />
 
 ## Properties
 
