@@ -3,10 +3,9 @@
   Network Link Monitor Plugin for Q-SYS
   Author: Michael Goodyear
   Email: michael@locimation.com
-  Version: 1.3.0
+  Version: 1.4.0
   
   (C) Copyright 2020 Locimation Pty Ltd
-
   Permission is hereby granted, free of charge,
   to any person obtaining a copy of this software
   and associated documentation files (the "Software"),
@@ -35,8 +34,8 @@
 
 PluginInfo = {
   Name = "Locimation~Network Link Monitor",
-  Description = "Added link error suppression",
-  Version = "1.3.0",
+  Description = "Added Community Property",
+  Version = "1.4.0",
   Id = "ed832ccd-663e-4b41-8be9-9c182550b6a0"
 }
 
@@ -72,6 +71,11 @@ function GetProperties()
       Min = 0.01,
       Max = 0.5,
       Value = 0.01
+    },
+    {
+      Name = 'Community',
+      Type = 'string',
+      Value = 'public'
     }
   }
 end;
@@ -240,7 +244,7 @@ MAPS = {
 -- [[ SNMP client ]] --
 function ipChange()
   Device = SNMPSession.New(SNMP.SessionType.V2c);
-  Device:setCommunity('public');
+  Device:setCommunity(Properties.Community.Value);
   Device:setHostName(Controls.IP.String);
   Device:startSession();
   Device.ErrorHandler = function(r) print('ERROR', require('json').encode(r)); end;

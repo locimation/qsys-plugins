@@ -15,7 +15,8 @@ The plugin has configurable properties for operation:
 *Note:* If a **Link Index** is not specified in the plugin controls, the interface will not be monitored.
 2. **Poll Interval** - the interval between SNMP polls of each interface. Default: 0.3s
 3. **Packet Interval** - the interval between SNMP packets sent to the device.<br>*Note:* This must be low enough for the specified poll interval and link count, or else the SNMP queue will overrun.
-4. **Show Debug** - enabling debug output will print the current SNMP queue length.
+4. **Community** - the SNMP v2 community name (usually "public")
+5. **Show Debug** - enabling debug output will print the current SNMP queue length.
 
 ## Setup
 
