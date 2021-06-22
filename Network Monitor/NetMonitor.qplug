@@ -30,8 +30,8 @@
 
 PluginInfo = {
   Name = "Locimation~Network Link Monitor",
-  Description = "Added Community Property",
-  Version = "1.3.1",
+  Description = "Added Uptime polling",
+  Version = "1.3.2",
   Id = "ed832ccd-663e-4b41-8be9-9c182550b6a0"
 }
 
@@ -79,10 +79,11 @@ end;
 function GetControls(props)
 
   return {
-    { Name = 'IP', ControlType = 'Text' },
-    { Name = 'Name', ControlType = 'Indicator', IndicatorType = 'Text', UserPin = true, PinStyle = 'Output', PrettyName = 'System~Name' },
-    { Name = 'Model', ControlType = 'Indicator', IndicatorType = 'Text', UserPin = true, PinStyle = 'Output', PrettyName = 'System~Model' },
+    { Name = 'IP',      ControlType = 'Text' },
+    { Name = 'Name',    ControlType = 'Indicator', IndicatorType = 'Text', UserPin = true, PinStyle = 'Output', PrettyName = 'System~Name' },
+    { Name = 'Model',   ControlType = 'Indicator', IndicatorType = 'Text', UserPin = true, PinStyle = 'Output', PrettyName = 'System~Model' },
     { Name = 'Contact', ControlType = 'Indicator', IndicatorType = 'Text', UserPin = true, PinStyle = 'Output', PrettyName = 'System~Contact' },
+    { Name = 'Uptime',  ControlType = 'Indicator', IndicatorType = 'Text', UserPin = true, PinStyle = 'Output', PrettyName = 'System~Uptime'},
     { Name = 'Link Index', ControlType = 'Text', Count = props['Link Count'].Value },
     {
       Name = 'Link Up',
@@ -151,20 +152,25 @@ function GetControlLayout(props)
       Size = { width, 16 },
       Margin = 1
     },
-    ['IP'] = {
+    ['Uptime'] = {
       Position = { 100, 144 },
+      Size = { width, 16 },
+      Margin = 1
+    },
+    ['IP'] = {
+      Position = { 100, 160 },
       Size = { width, 16 },
       Margin = 1
     };
   }
   for i=1,props['Link Count'].Value do
     controls[('Link Index %d'):format(i)] = {
-      Position = { 100 + (i-1) * 36, 160 },
+      Position = { 100 + (i-1) * 36, 176 },
       Size = { 36, 16 },
       Margin = 1
     };
     controls[('Link Up %d'):format(i)] = {
-      Position = { 100 + (i-1) * 36, 176 },
+      Position = { 100 + (i-1) * 36, 192 },
       Size = { 36, 16 },
       Color = { 0, 255, 0 },
       UnlinkOffColor = true,
@@ -177,7 +183,7 @@ function GetControlLayout(props)
       ButtonVisualStyle = 'Flat'
     };
     controls[('Suppress %d'):format(i)] = {
-      Position = { 100 + (i-1) * 36, 192 },
+      Position = { 100 + (i-1) * 36, 208 },
       Size = { 36, 16 },
       Color = { 0xEF, 0x9C, 0x00 },
       CornerRadius = 3,
@@ -197,13 +203,14 @@ function GetControlLayout(props)
     { Type = 'Label', Text = 'Status',  Position = { 15,  96 }, Size = { 80, 16 }, HTextAlign = 'Left' },
     { Type = 'Label', Text = 'Model',   Position = { 15, 112 }, Size = { 80, 16 }, HTextAlign = 'Left' },
     { Type = 'Label', Text = 'Contact', Position = { 15, 128 }, Size = { 80, 16 }, HTextAlign = 'Left' },
-    { Type = 'Label', Text = 'IP',      Position = { 15, 144 }, Size = { 80, 16 }, HTextAlign = 'Left' },
-    { Type = 'Label', Text = 'Link Index',  Position = { 15, 160 }, Size = { 80, 16 }, HTextAlign = 'Left' },
-    { Type = 'Label', Text = 'Link Up',     Position = { 15, 176 }, Size = { 80, 16 }, HTextAlign = 'Left' },
-    { Type = 'Label', Text = 'Suppress',    Position = { 15, 192 }, Size = { 80, 16 }, HTextAlign = 'Left' },
+    { Type = 'Label', Text = 'Uptime',  Position = {15, 144},   Size = {80, 16},    HTextAlign = 'Left'},
+    { Type = 'Label', Text = 'IP',      Position = { 15, 160 }, Size = { 80, 16 }, HTextAlign = 'Left' },
+    { Type = 'Label', Text = 'Link Index',  Position = { 15, 176 }, Size = { 80, 16 }, HTextAlign = 'Left' },
+    { Type = 'Label', Text = 'Link Up',     Position = { 15, 192 }, Size = { 80, 16 }, HTextAlign = 'Left' },
+    { Type = 'Label', Text = 'Suppress',    Position = { 15, 208 }, Size = { 80, 16 }, HTextAlign = 'Left' },
     {
       Type = 'Image',
-      Position = { math.max(0, (graphicsWidth - 450) / 2), 224 },
+      Position = { math.max(0, (graphicsWidth - 450) / 2), 230 },
       Size = { 450, 20 },
       Image = MIT_FOOTER
     },
@@ -234,7 +241,8 @@ if(not Controls) then return; end;
 MAPS = {
   ['iso.3.6.1.2.1.1.5.0'] = 'Name',
   ['iso.3.6.1.2.1.1.4.0'] = 'Contact',
-  ['iso.3.6.1.2.1.1.1.0'] = 'Model'
+  ['iso.3.6.1.2.1.1.1.0'] = 'Model',
+  ['iso.3.6.1.2.1.1.3.0'] = 'Uptime'
 }
 
 -- [[ SNMP client ]] --
