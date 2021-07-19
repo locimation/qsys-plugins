@@ -38,4 +38,4 @@ If the MAC address is not found on the switch, the "Port" display will show "Not
 
 This plugin pairs well with our [*Match*](https://github.com/locimation/qsys-plugins/tree/master/Logic) plugin (in "multi-match" mode), for use cases where different logic should be triggered by presence on different switch ports. See the example below:
 
-<img src="example.png" />
+<img src="example.PNG" />
