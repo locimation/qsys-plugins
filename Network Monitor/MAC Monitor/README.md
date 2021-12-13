@@ -2,6 +2,10 @@
 
 ![MIT License](https://img.shields.io/badge/license-MIT-blue) [![For production use](https://img.shields.io/badge/stability-prod%20ready-brightgreen)](https://gist.github.com/gdyr/2e54d8afb39d4ea789b4830603ca34b2) [![Uses stable documented features](https://img.shields.io/badge/support-stable-brightgreen)](https://gist.github.com/gdyr/2e54d8afb39d4ea789b4830603ca34b2)
 
+<a href="https://raw.githubusercontent.com/locimation/qsys-plugins/master/Network%20Monitor/MAC%20Monitor/MACMonitor.qplug" download>
+  <img src="https://shields.io/badge/qplug-Download-green?style=for-the-badge" />
+</a>
+
 This is a control plugin that enables Q-Sys to monitor the MAC address table of a device (typically, a network switch) in order to see which port a specified MAC address is reachable on.
 
 This may be used to detect which network port a peripheral is connected to, and apply different logic depending on the result.
