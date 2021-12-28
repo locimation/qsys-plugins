@@ -34,10 +34,10 @@
 ]]
 
 PluginInfo = {
-  Name = "SVSi Decoder v1.3",
-  Version = "1.3",
+  Name = "SVSi Decoder v1.3.1",
+  Version = "1.3.1",
   Id = "9d3fa871-0c9e-4bf3-85bc-f70656f4b5c4",
-  Description = "Re-release w/ Infrared support",
+  Description = "Added authoritative property and subsequent functions",
   ShowDebug = false
 }
 
@@ -46,7 +46,15 @@ function GetColor()
 end;
 
 function GetProperties()
-  return {};
+  local props = {}
+
+  table.insert(props,{
+    Name = "Authoritative",
+    Type = "boolean", 
+    Value = true,
+  })
+
+  return props;
 end;
 
 function GetControls(props)
@@ -746,7 +754,11 @@ SVSiSocket.EventHandler = function(sock, evt)
     end;
     updateStatus(0,'');
     updateDisplay();
-    doDiff();
+    if Properties["Authoritative"].Value == true then
+      doDiff();
+    else
+      simplyUdateControls()
+    end
   elseif evt == TcpSocket.Events.Reconnect then
     updateStatus(5, 'Connecting');
   elseif evt == TcpSocket.Events.Closed then
@@ -875,6 +887,46 @@ function doDiff()
   end;
   
 end;
+
+function simplyUdateControls()
+  
+  -- Video stream
+  Controls['Video Stream'].String = DECODER_STATUS['STREAM']
+  -- Audio stream + follow
+  Controls['Audio Stream'].String = DECODER_STATUS['STREAMAUDIO']
+  -- Local playback
+  local isLocalMode = DECODER_STATUS['PLAYMODE']~='live';
+  Controls['Local Playback'].Boolean = isLocalMode
+  if isLocalMode then 
+    Controls['Local Playlist'].String = DECODER_STATUS['PLAYLIST']
+  else
+    Controls['Local Playlist'].String = "n/a"
+  end
+
+  -- Video Mute
+  Controls['Video Mute'].Boolean = DECODER_STATUS['DVIOFF'] == 'off'
+ 
+  -- Audio Mute
+  Controls['Audio Mute'].Boolean = DECODER_STATUS['MUTE'] ~='0'
+  
+  -- Left Gain
+  Controls['Left Gain'].String = DECODER_STATUS['LINEOUTVOL_L']
+  -- Right Gain
+  Controls['Right Gain'].String = DECODER_STATUS['LINEOUTVOL_R'] 
+  
+end
+
+
+-- Local Controls Event Handlers, easy stuff, were already done!
+Controls['Video Stream'].EventHandler = doDiff
+Controls['Audio Stream'].EventHandler = doDiff
+Controls['Local Playback'].EventHandler = doDiff
+Controls['Local Playlist'].EventHandler = doDiff
+Controls['Local Playlist'].EventHandler = doDiff
+Controls['Video Mute'].EventHandler = doDiff
+Controls['Audio Mute'].EventHandler = doDiff
+Controls['Left Gain'].EventHandler = doDiff
+Controls['Right Gain'].EventHandler = doDiff
 
 -- IR functionality
 Controls['IR Send'].EventHandler = function()
