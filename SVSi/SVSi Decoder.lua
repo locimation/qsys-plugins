@@ -3,7 +3,7 @@
   SVSi Decoder Q-Sys Plugin
   Author: Michael Goodyear
   Email: michael@locimation.com
-  Version: 1.3
+  Version: 1.4
   
   Copyright 2020 Locimation Pty Ltd
 
@@ -34,10 +34,10 @@
 ]]
 
 PluginInfo = {
-  Name = "SVSi Decoder v1.3",
-  Version = "1.3",
+  Name = "SVSi Decoder v1.4",
+  Version = "1.4",
   Id = "9d3fa871-0c9e-4bf3-85bc-f70656f4b5c4",
-  Description = "Re-release w/ Infrared support",
+  Description = "Update to match new firmware",
   ShowDebug = false
 }
 
@@ -767,6 +767,7 @@ end;
 PollTimer:Start(0.1);
 
 function handleFeedback(line)
+  -- print('> ' .. line);
   local prop,val = line:match('(.*):(.*)');
   DECODER_STATUS[prop] = val;
 end;
@@ -780,7 +781,7 @@ function updateDisplay()
   Controls['Display Connected'].Color = displayConnected and 'green' or 'darkred';
   Controls['Display Connected'].Boolean = displayConnected;
   
-  Controls['Current Resolution'].String = DECODER_STATUS['INPUTRES'];
+  Controls['Current Resolution'].String = DECODER_STATUS['INPUTRES'] or DECODER_STATUS['MODE'] or '';
   
   Controls['Unit Type'].String = DECODER_STATUS['SVSI_RXGEN2']:sub(1,5);
   Controls['Serial'].String = DECODER_STATUS['SVSI_RXGEN2'];
