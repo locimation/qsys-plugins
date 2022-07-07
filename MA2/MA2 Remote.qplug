@@ -88,7 +88,15 @@ function GetControls(props)
       ControlType = 'Button',
       ButtonType = 'Momentary',
       Count = tonumber(props['Button Count'].Value),
-      PinStyle = 'Both',
+      PinStyle = 'Input',
+      UserPin = true
+    },
+    {
+      Name = 'Button Status',
+      ControlType = 'Indicator',
+      IndicatorType = 'LED',
+      Count = tonumber(props['Button Count'].Value),
+      PinStyle = 'Output',
       UserPin = true
     },{
       Name = 'IP',
@@ -311,18 +319,23 @@ function GetControlLayout(props)
         PrettyName = ('%s~First Exec Number'):format(nf) });
     end;
 
-    elseif(page == 'Action Buttons') then
+  elseif(page == 'Action Buttons') then
     local rows = math.ceil(props['Button Count'].Value / 5);
-    bg(60 + rows * 118);
+    bg(60 + rows * (118 + 15));
 
     for i=1,props['Button Count'].Value do
       local row = math.floor((i - 1) / 5);
       local col = (i - 1) % 5;
       layout['Button ' .. i] = ma_playback({
-        Position = { 30 + 100 * col, 30 + 118 * row },
+        Position = { 30 + 100 * col, 30 + (118 + 15) * row },
         Size = { 100, 118 },
         PrettyName = ('Action Buttons~Button %d'):format(i);
       });
+      
+      layout['Button Status ' .. i] = {
+	    Position = { 72 + 100 * col, 30 + (118 + 15) * row + 118 },
+        PrettyName = ('Action Button Status~Button %d'):format(i);
+      };
     end;
 
   elseif(page:match('^Faders')) then
@@ -667,6 +680,13 @@ function updatePlaybacks(data)
               Margin = 0,
               Legend = ''
             });
+
+			-- Update the indicator LEDs/Pins for Action Buttons
+			if(item['isRun'] == 1) then
+				Controls['Button Status'][buttonExec].Value = true;
+			else
+				Controls['Button Status'][buttonExec].Value = false;
+			end;
           end;
         end;
         
